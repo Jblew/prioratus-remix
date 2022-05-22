@@ -4,16 +4,7 @@
 			"path": ".."
 		},
 		{
-			"name": "backend/prisma",
-			"path": "../backend/prisma"
-		},
-		{
-			"name": "backend/src",
-			"path": "../backend/src"
-		},
-		{
-			"name": "frontend/src",
-			"path": "../frontend/src"
+			"path": "../app"
 		},
 	],
 	"settings": {
