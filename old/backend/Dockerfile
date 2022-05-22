@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM skip_pulling_metadata_for_a_while
 WORKDIR /app
 
 ADD package.json package-lock.json /app/
