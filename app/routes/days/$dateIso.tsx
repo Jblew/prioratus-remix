@@ -1,31 +1,70 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node"
 import { json, redirect } from "@remix-run/node"
-import { Form, useCatch, useLoaderData } from "@remix-run/react"
+import { Form, Link, Outlet, useCatch, useLoaderData } from "@remix-run/react"
 import invariant from "tiny-invariant"
 
 import type { Note } from "~/models/note.server"
 import { deleteNote } from "~/models/note.server"
 import { getNote } from "~/models/note.server"
 import { requireUserId } from "~/session.server"
+import { DateTime } from "luxon"
+import container from "~/container.server"
+import { UserConfigRepository } from "~/domain"
 
 type LoaderData = {
-    iso: string
+    iso: {
+        yesterday: string
+        today: string
+        tomorrow: string
+    }
 }
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     const userId = await requireUserId(request)
     invariant(params.dateIso, "dateIso not found")
 
-    return json<LoaderData>({ iso: params.dateIso })
+    const today = params.dateIso
+    const yesterday = DateTime.fromISO(today).minus({ days: 1 }).toISODate()
+    const tomorrow = DateTime.fromISO(today).plus({ days: 1 }).toISODate()
+
+    return json<LoaderData>({ iso: { yesterday, today, tomorrow } })
 }
 
 export default function DateView() {
     const data = useLoaderData() as LoaderData
 
     return (
-        <div>
-            <h1>This is a day {data.iso}</h1>
+        <div className="flex h-full min-h-screen flex-col bg-slate-800">
+            <header className="flex items-center justify-between bg-slate-800 p-4 text-white">
+                <h1 className="text-3xl font-bold">
+                    <Link to="/days">Prioratus</Link>
+                </h1>
+                <Logout />
+            </header>
+            <nav className="flex items-center justify-between p-2 bg-slate-500 text-white">
+                <Link to={`/days/${data.iso.yesterday}`} className="rounded bg-slate-800 hover:bg-slate-600 py-1 px-2">&laquo;</Link>
+                <p className="text-italic">
+                    {DateTime.fromISO(data.iso.today).setLocale("pl").toFormat("cccc, dd LLLL")}
+                </p>
+                <Link to={`/days/${data.iso.tomorrow}`} className="rounded bg-slate-800 hover:bg-slate-600 py-1 px-2">&raquo;</Link>
+            </nav>
+            <main className="text-white mt-4">
+                <Outlet />
+            </main>
         </div>
+    )
+}
+
+function Logout() {
+    return (
+        <Form action="/logout" method="post">
+            <button
+                type="submit"
+                className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+            >
+                Logout
+            </button>
+        </Form>
     )
 }
 
