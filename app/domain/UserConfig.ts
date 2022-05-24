@@ -1,9 +1,9 @@
-import { Named } from "@/utils"
+import { Named } from "~/utils"
 
 export interface UserConfig {
     email: string
     timeZone: string
-    hours: Record<string, TimeStr>
+    horas: Record<string, TimeStr>
 }
 
 export type TimeStr = Named<string, "TimeStr">
