@@ -1,15 +1,10 @@
-import type { ActionFunction, LoaderFunction } from "@remix-run/node"
-import { json, redirect } from "@remix-run/node"
+import type { LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import { Form, Link, Outlet, useCatch, useLoaderData } from "@remix-run/react"
 import invariant from "tiny-invariant"
 
-import type { Note } from "~/models/note.server"
-import { deleteNote } from "~/models/note.server"
-import { getNote } from "~/models/note.server"
 import { requireUserId } from "~/session.server"
 import { DateTime } from "luxon"
-import container from "~/container.server"
-import { UserConfigRepository } from "~/domain"
 import { Button } from "~/components"
 
 type LoaderData = {
