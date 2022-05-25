@@ -1,8 +1,15 @@
-import type { ActionFunction, LoaderFunction } from "@remix-run/node"
+import type { LoaderFunction } from "@remix-run/node"
 import { redirect } from "@remix-run/node"
-import { useUser } from "~/utils"
+import { generateGithubAuthorizeURLWithState, isUserAuthenticatedToGithub } from "~/models/github.server"
+import { getUser } from "~/session.server"
 
 export const loader: LoaderFunction = async ({ request }) => {
-    const user = useUser()
-    return redirect("https://github.com/login/oauth/authorize")
+    const user = await getUser(request)
+    if (!user) throw redirect("/login")
+
+    if (await isUserAuthenticatedToGithub(user.id)) {
+        return redirect("./status")
+    }
+    const authorizeURL = await generateGithubAuthorizeURLWithState(user.id)
+    return redirect(authorizeURL)
 }
