@@ -6,6 +6,9 @@
 		{
 			"path": "../app"
 		},
+		{
+			"path": "../prisma"
+		},
 	],
 	"settings": {
 		"github-actions.workflows.pinned.workflows": [
