@@ -10,6 +10,7 @@ import * as React from "react"
 import { createUserSession, getUserId } from "~/session.server"
 import { verifyLogin } from "~/models/user.server"
 import { safeRedirect, validateEmail } from "~/utils"
+import { Button } from "~/components"
 
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await getUserId(request)
@@ -149,12 +150,13 @@ export default function LoginPage() {
           </div>
 
           <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
+          <Button
             type="submit"
-            className="w-full rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
+            className="w-full"
+            variant="primary"
           >
             Log in
-          </button>
+          </Button>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input

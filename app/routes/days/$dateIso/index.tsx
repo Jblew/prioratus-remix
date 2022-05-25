@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node"
 import { json } from "@remix-run/node"
-import { useLoaderData } from "@remix-run/react"
+import { Link, useLoaderData } from "@remix-run/react"
 import invariant from "tiny-invariant"
 import { requireUserId } from "~/session.server"
 
@@ -20,5 +20,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export default function DateViewIndex() {
     const data = useLoaderData() as LoaderData
 
-    return (<i>Today is {data.iso}</i>)
+    return (<div>
+        <Link to="./goals" className="btn--primary">Goals</Link>
+        <Link to="./breviary" className="btn--primary">Breviary &amp; tasks</Link>
+    </div>)
 }

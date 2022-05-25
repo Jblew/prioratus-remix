@@ -5,6 +5,7 @@ import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react"
 import { requireUserId } from "~/session.server"
 import { useUser } from "~/utils"
 import { getNoteListItems } from "~/models/note.server"
+import { Button } from "~/components"
 
 type LoaderData = {
   noteListItems: Awaited<ReturnType<typeof getNoteListItems>>
@@ -28,12 +29,12 @@ export default function NotesPage() {
         </h1>
         <p>{user.email}</p>
         <Form action="/logout" method="post">
-          <button
+          <Button
             type="submit"
-            className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
+            variant="secondary"
           >
             Logout
-          </button>
+          </Button>
         </Form>
       </header>
 
