@@ -1,25 +1,26 @@
 import { useActionData, useLoaderData } from "@remix-run/react"
-import { ActionFunction, LoaderFunction, redirect, json } from "@remix-run/server-runtime"
+import { ActionFunction, LoaderFunction, json } from "@remix-run/server-runtime"
 import { Button } from "~/components"
 import container from "~/container.server"
-import { UserConfig, UserConfigRepository } from "~/domain"
-import { getUser, mustGetUser } from "~/session.server"
+import { User, UserConfig, UserConfigRepository } from "~/domain"
+import { mustGetUser } from "~/session.server"
 
 const timeZones = [
     "Europe/Warsaw",
     "Europe/London"
 ]
 
+type Errors = {
+    timeZone?: string
+}
+
 type ActionLoaderData = {
     userConfig: UserConfig
-    errors?: {
-        timeZone?: string
-    }
+    errors?: Errors
 }
 
 export const loader: LoaderFunction = async ({ request }) => {
     const user = await mustGetUser(request)
-    console.log('LOADER, user=', user)
     const userConfig = await container.get(UserConfigRepository).get(user.id)
     return json<ActionLoaderData>({
         userConfig
@@ -28,23 +29,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
     const user = await mustGetUser(request)
-    console.log('ACTION, user=', user)
-    const oldUserConfig = await container.get(UserConfigRepository).get(user.id)
-    const body = await request.formData()
-    const timeZone = body.get("timeZone")?.toString()
-    if (!timeZone || !timeZones.includes) {
-        return json<ActionLoaderData>({
-            userConfig: oldUserConfig,
-            errors: { timeZone: "You must select valid time zone" }
-        })
-    }
-    const newUserConfig: Omit<UserConfig, "userId"> = {
-        timeZone
-    }
-    const userConfig = await container.get(UserConfigRepository).update(user.id, newUserConfig)
-    return json<ActionLoaderData>({
-        userConfig,
-    })
+    const [errors, userConfig] = await updateConfig(user.id, await request.formData())
+    return json<ActionLoaderData>({ userConfig, errors })
 }
 
 export default function ConfigRoute() {
@@ -76,4 +62,21 @@ export default function ConfigRoute() {
             </form>
         </main>
     )
+}
+
+async function updateConfig(userID: User["id"], formData: FormData): Promise<[Errors, UserConfig]> {
+    const userConfigRepo = container.get(UserConfigRepository)
+    const timeZone = formData.get("timeZone")?.toString()
+    if (!timeZone || !timeZones.includes) {
+        return [
+            { timeZone: "You must select valid time zone" },
+            await userConfigRepo.get(userID)
+        ]
+    }
+    return [
+        {},
+        await userConfigRepo.update(userID, {
+            timeZone
+        })
+    ]
 }
