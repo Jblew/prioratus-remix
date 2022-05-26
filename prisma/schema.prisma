@@ -19,6 +19,7 @@ model User {
   githubAccess     GithubAccess?
   githubOAuthState GithubOAuthState[]
   UserConfig       UserConfig?
+  BoardProvider    BoardProvider[]
 }
 
 model UserConfig {
@@ -58,4 +59,10 @@ model GithubOAuthState {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String @unique
   stateCode String
+}
+
+model BoardProvider {
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId   String @unique
+  provider String
 }

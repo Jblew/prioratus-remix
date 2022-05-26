@@ -1,6 +1,7 @@
-import { useActionData, useLoaderData } from "@remix-run/react"
+import { Link, useActionData, useLoaderData } from "@remix-run/react"
 import { ActionFunction, LoaderFunction, json } from "@remix-run/server-runtime"
-import { Button } from "~/components"
+import React from "react"
+import { Button, FormControl, LinkLink } from "~/components"
 import container from "~/container.server"
 import { User, UserConfig, UserConfigRepository } from "~/domain"
 import { mustGetUser } from "~/session.server"
@@ -33,7 +34,7 @@ export const action: ActionFunction = async ({ request }) => {
     return json<ActionLoaderData>({ userConfig, errors })
 }
 
-export default function ConfigRoute() {
+export default function ConfigEditRoute() {
     const actionData = useActionData<ActionLoaderData>()
     const loaderData = useLoaderData<ActionLoaderData>()
     const data = {
@@ -41,26 +42,24 @@ export default function ConfigRoute() {
         ...(actionData || {})
     }
     return (
-        <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center" >
-            <form method="post" className="space-y-4">
-                <p>
-                    <label className="rounded bg-slate-100 p-2">
-                        Time zone:{"  "}
-                        <select name="timeZone" defaultValue={data.userConfig.timeZone}>
-                            {timeZones.map(tzName => (
-                                <option value={tzName}>{tzName}</option>
-                            ))}
-                        </select>
-                    </label>
-                </p>
-                {data?.errors?.timeZone ? (
-                    <p style={{ color: "red" }}>
-                        {data.errors.timeZone}
-                    </p>
-                ) : null}
-                <Button type="submit" variant="primary">Save</Button>
-            </form>
-        </main>
+
+        <form method="post" className="space-y-4">
+            <FormControl>
+                Time zone:{"  "}
+                <select name="timeZone" defaultValue={data.userConfig.timeZone}>
+                    {timeZones.map(tzName => (
+                        <option value={tzName}>{tzName}</option>
+                    ))}
+                </select>
+            </FormControl>
+            {data?.errors?.timeZone ? (
+                <FormControl className="text-red">
+                    {data.errors.timeZone}
+                </FormControl>
+            ) : null}
+
+            <p><Button type="submit" variant="primary">Save</Button></p>
+        </form>
     )
 }
 
