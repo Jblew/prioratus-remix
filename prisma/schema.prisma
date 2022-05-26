@@ -18,6 +18,13 @@ model User {
   notes            Note[]
   githubAccess     GithubAccess?
   githubOAuthState GithubOAuthState[]
+  UserConfig       UserConfig?
+}
+
+model UserConfig {
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId   String @unique
+  timeZone String
 }
 
 model Password {

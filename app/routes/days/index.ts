@@ -12,7 +12,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export const loader: LoaderFunction = async ({ request }) => {
     const user = await requireUser(request)
-    const userConfig = await container.get(UserConfigRepository).get(user.email)
+    const userConfig = await container.get(UserConfigRepository).get(user.id)
     const timeZone = userConfig!.timeZone
     const todayIso = DateTime.now().setZone(timeZone).toFormat('yyyy-MM-dd')
     return redirect(`/days/${todayIso}`)

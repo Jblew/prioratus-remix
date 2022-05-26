@@ -1,14 +1,13 @@
-import { Named } from "~/utils"
-
 export interface UserConfig {
     userId: string
-    email: string
     timeZone: string
-    horas: Record<string, TimeStr>
 }
 
-export type TimeStr = Named<string, "TimeStr">
+export const defaultUserConfig: Omit<UserConfig, "userId"> = {
+    timeZone: "Europe/Warsaw",
+}
 
 export abstract class UserConfigRepository {
-    abstract get(userID: string): Promise<UserConfig | null>
+    abstract get(userID: string): Promise<UserConfig>
+    abstract update(userID: string, config: Omit<UserConfig, "userId">): Promise<UserConfig>
 }
