@@ -1,6 +1,7 @@
 import type { LoaderFunction } from "@remix-run/node"
 import { redirect, json } from "@remix-run/node"
-import { storeGithubAccess } from "~/models/github.server"
+import container from "~/container.server"
+import { GithubOctokitService } from "~/models/github.server"
 import { getUser } from "~/session.server"
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -13,6 +14,7 @@ export const loader: LoaderFunction = async ({ request }) => {
         throw json("Missing code parameter", { status: 404 })
     }
 
-    await storeGithubAccess(user.id, { code })
+    const githubService = container.get(GithubOctokitService)
+    await githubService.establishAccessWithCode(user.id, { code })
     return redirect("./status")
 }

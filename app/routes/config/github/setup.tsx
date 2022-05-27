@@ -19,7 +19,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json<LoaderData>({ isAuthenticated })
 }
 
-export default function ConfigGithubIndex() {
+export default function ConfigGithubSetup() {
     const data = useLoaderData<LoaderData>()
     return <>
         {data.isAuthenticated && (<>

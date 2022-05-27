@@ -14,12 +14,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password         Password?
-  notes            Note[]
-  githubAccess     GithubAccess?
-  githubOAuthState GithubOAuthState[]
-  UserConfig       UserConfig?
-  BoardProvider    BoardProvider[]
+  password          Password?
+  notes             Note[]
+  githubAccess      GithubAccess?
+  githubOAuthState  GithubOAuthState[]
+  UserConfig        UserConfig?
+  GithubBoardConfig GithubBoardConfig?
 }
 
 model UserConfig {
@@ -61,8 +61,8 @@ model GithubOAuthState {
   stateCode String
 }
 
-model BoardProvider {
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId   String @unique
-  provider String
+model GithubBoardConfig {
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String @unique
+  projectId Int
 }
