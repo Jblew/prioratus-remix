@@ -42,7 +42,6 @@ export default function ConfigEditRoute() {
         ...(actionData || {})
     }
     return (
-
         <form method="post" className="space-y-4">
             <FormControl>
                 Time zone:{"  "}
