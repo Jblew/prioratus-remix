@@ -70,29 +70,27 @@ interface GithubTokensResponse {
 }
 async function refreshGithubAccessToken(userId: User["id"], reqOpts: { code: string } | {}): Promise<GithubTokensResponse> {
     const requestBody = "code" in reqOpts
-        ? accessTokenRequestBodyForCode(userId, reqOpts)
-        : accessTokenRequestBodyForRefresh(userId)
-    const formBody = []
-    for (var property in requestBody) {
-        var encodedKey = encodeURIComponent(property)
-        var encodedValue = encodeURIComponent((requestBody as any)[property])
-        formBody.push(encodedKey + "=" + encodedValue)
-    }
-    const resp = await fetch(githubAccessTokenURL, {
+        ? (await accessTokenRequestBodyForCode(userId, reqOpts))
+        : (await accessTokenRequestBodyForRefresh(userId))
+    const fetchConfig = {
         method: "POST",
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
-        body: formBody.join("&")
-    })
-    if (resp.status !== 200) {
-        console.log({
-            status: resp.status,
-            body: await resp.text()
-        })
-        throw new Error(`Non 200 response (${resp.status}) from github oauth access token endpoint`)
+        body: JSON.stringify(requestBody)
     }
-    return resp.json()
+    const resp = await fetch(githubAccessTokenURL, fetchConfig)
+    if (resp.status !== 200) {
+        const errorText = await resp.text()
+        throw new Error(`Non 200 response (${resp.status}) from github oauth access token endpoint: ${errorText.substring(0, 100)}`)
+    }
+
+    const responseBody = await resp.json()
+    if (responseBody.error) {
+        throw new Error(`Received error from github oauth access token endpoint: ${responseBody.error}: ${responseBody.error_description}`)
+    }
+    return responseBody as GithubTokensResponse
 }
 
 async function accessTokenRequestBodyForCode(userId: User["id"], { code }: { code: string }) {
