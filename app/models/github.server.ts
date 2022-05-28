@@ -18,8 +18,8 @@ const GITHUB_OAUTH_CALLBACK_URL = envMust("GITHUB_OAUTH_CALLBACK_URL")
 @provide(GithubBoardProvider)
 export class GithubBoardProvider {
     constructor(
-        @inject(GithubOctokitService)
-        private octokitService: GithubOctokitService
+        @inject(GithubService)
+        private octokitService: GithubService
     ) { }
 
     async listBoards(userId: User["id"]): Promise<{ name: string, id: number, selected: boolean }[]> {
@@ -110,8 +110,8 @@ class OctokitBoard implements Board {
     }
 }
 
-@provide(GithubOctokitService)
-export class GithubOctokitService {
+@provide(GithubService)
+export class GithubService {
     async getOctokit(userId: User["id"]) {
         const isAuthenticated = await this.isUserAuthenticated(userId)
         if (!isAuthenticated) { throw new Error(`User ${userId} is not authenticated`) }

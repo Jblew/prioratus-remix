@@ -7,7 +7,6 @@ import container from "~/container.server"
 import { GithubBoardProvider } from "~/models/github.server"
 import { mustGetUser } from "~/session.server"
 
-
 type ActionData = {
     errors: { project?: string }
 }
