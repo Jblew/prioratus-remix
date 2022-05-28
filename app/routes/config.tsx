@@ -7,7 +7,7 @@ export default function ConfigRoute() {
             <div className="text-center">
                 <p className="flex justify-around mb-8 w-96">
                     <LinkLink to="edit">General</LinkLink>{" "}
-                    <LinkLink to="github">Github</LinkLink>
+                    <LinkLink to="github/">Github</LinkLink>
                 </p>
                 <Outlet />
             </div>

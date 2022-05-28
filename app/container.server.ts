@@ -7,7 +7,7 @@ import { staticConfig } from "./config-static"
 
 const container = new Container()
 container.bind<Config>(Config).toConstantValue(staticConfig)
-container.load(modelContainerModule)
 container.load(buildProviderModule())
+container.load(modelContainerModule)
 
 export default container

@@ -4,7 +4,7 @@ import { json, ActionFunction } from "@remix-run/node"
 import { useActionData, useLoaderData } from "@remix-run/react"
 import { Button, FormControl } from "~/components"
 import container from "~/container.server"
-import { GithubBoardProvider } from "~/models/github.server"
+import { GithubBoardProvider } from "~/models/github-board.server"
 import { mustGetUser } from "~/session.server"
 
 type ActionData = {

@@ -9,7 +9,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     const githubService = container.get(GithubService)
     const isAuthenticated = await githubService.isUserAuthenticated(user.id)
     if (isAuthenticated) {
-        return redirect("authenticated")
+        return redirect("/config/github/authenticated")
     }
-    return redirect("setup")
+    return redirect("/config/github/setup")
 }

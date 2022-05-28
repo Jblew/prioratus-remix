@@ -31,8 +31,9 @@ export class BreviaryDay {
         if (!userConfig) {
             throw new Error(`Missing UserConfig for ${this.email}`)
         }
-        return Object.keys(userConfig.horas)
-            .map(horaKey => this.mapUserConfigHora(horaKey, userConfig.horas[horaKey], userConfig))
+        // return Object.keys(userConfig.horas)
+        // .map(horaKey => this.mapUserConfigHora(horaKey, userConfig.horas[horaKey], userConfig))
+        return []
     }
 
     private mapUserConfigHora(key: string, userTime: string, userConfig: UserConfig): UserHoraView {

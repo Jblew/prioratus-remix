@@ -14,10 +14,25 @@ export const loader: LoaderFunction = async ({ request }) => {
     if (!user) throw redirect("/login")
     const githubService = container.get(GithubService)
 
-    const octokit = await githubService.getOctokit(user.id)
-    const reposResp = await octokit.rest.repos.listForAuthenticatedUser()
+    const graphql = await githubService.getGraphql(user.id)
+    interface Resp {
+        viewer: {
+            repositories: {
+                nodes: Array<{ name: string }>
+            }
+        }
+    }
+    const resp = await graphql<Resp>(`{
+        viewer {
+            repositories(first: 100, affiliations: [OWNER]) {
+                nodes {
+                    name
+                }
+            }
+        }
+    }`)
     return json<LoaderData>({
-        repos: reposResp.data.map(repo => repo.name)
+        repos: resp.viewer.repositories.nodes.map(n => n.name)
     })
 }
 
