@@ -64,5 +64,5 @@ model GithubOAuthState {
 model GithubBoardConfig {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String @unique
-  projectId Int
+  projectId String
 }

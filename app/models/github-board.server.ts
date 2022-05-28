@@ -10,30 +10,47 @@ import { GithubService } from "./github.server"
 export class GithubBoardProvider {
     constructor(
         @inject(GithubService)
-        private octokitService: GithubService
+        private github: GithubService
     ) { }
 
-    async listBoards(userId: User["id"]): Promise<{ name: string, id: number, selected: boolean }[]> {
-        const octokit = await this.octokitService.getOctokit(userId)
-        const user = await this.getGithubUser(userId)
-        const username = user.name!
-        const projectsResp = await octokit.rest.projects.listForUser({ username })
-        if (projectsResp.status !== 200) { throw new Error(`Cannot get ${username} projects, got ${projectsResp.status} instead of 200`) }
+    async listBoards(userId: User["id"]): Promise<{ name: string, id: string, selected: boolean }[]> {
+        const graphql = await this.github.getGraphql(userId)
+        const data = await graphql<{
+            viewer: {
+                projectsNext: {
+                    nodes: Array<{
+                        id: string
+                        title: string
+                    }>
+                }
+            }
+        }>(`{
+            viewer {
+                projectsNext(first: 25) {
+                    nodes {
+                        id
+                        title
+                    }
+                }
+            }
+        }`)
         const currentId = await this.getCurrentProjectId(userId)
-        return projectsResp.data.map(project => ({
-            name: project.name,
+        console.log(JSON.stringify(data, undefined, 2))
+        return data.viewer.projectsNext.nodes.map(project => ({
+            name: project.title,
             id: project.id,
             selected: project.id === currentId
         }))
+
     }
 
-    async getCurrentProjectId(userId: User["id"]): Promise<number | null> {
+    async getCurrentProjectId(userId: User["id"]): Promise<string | null> {
         const record = await prisma.githubBoardConfig.findUnique({ where: { userId } })
         if (!record) { return null }
         return record.projectId
     }
 
-    async setCurrentProjectId(userId: User["id"], projectId: number) {
+    async setCurrentProjectId(userId: User["id"], projectId: string) {
         await prisma.githubBoardConfig.upsert({
             where: { userId },
             create: { userId, projectId },
@@ -41,23 +58,23 @@ export class GithubBoardProvider {
         })
     }
 
-    async getBoard(userId: User["id"]): Promise<Board> {
-        const [octokit, user, projectId] = await Promise.all([
-            this.octokitService.getOctokit(userId),
-            this.getGithubUser(userId),
-            this.getCurrentProjectId(userId)
-        ])
-        if (!projectId) { throw new Error(`User ${userId} does not have github board configured`) }
-        const username = user.name!
-        return new OctokitBoard(octokit, username, projectId)
-    }
+    // async getBoard(userId: User["id"]): Promise<Board> {
+    //     const [octokit, user, projectId] = await Promise.all([
+    //         this.octokitService.getOctokit(userId),
+    //         this.getGithubUser(userId),
+    //         this.getCurrentProjectId(userId)
+    //     ])
+    //     if (!projectId) { throw new Error(`User ${userId} does not have github board configured`) }
+    //     const username = user.name!
+    //     return new OctokitBoard(octokit, username, projectId)
+    // }
 
-    private async getGithubUser(userId: User["id"]) {
-        const octokit = await this.octokitService.getOctokit(userId)
-        const userResp = await octokit.rest.users.getAuthenticated()
-        if (userResp.status !== 200) { throw new Error(`Cannot get github username, got ${userResp.status} instead of 200`) }
-        return userResp.data
-    }
+    // private async getGithubUser(userId: User["id"]) {
+    //     const octokit = await this.octokitService.getOctokit(userId)
+    //     const userResp = await octokit.rest.users.getAuthenticated()
+    //     if (userResp.status !== 200) { throw new Error(`Cannot get github username, got ${userResp.status} instead of 200`) }
+    //     return userResp.data
+    // }
 }
 
 class OctokitBoard implements Board {
