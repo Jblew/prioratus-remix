@@ -33,7 +33,10 @@ export class GithubBoardProvider {
                     }
                 }
             }
-        }`)
+        }`).catch(async err => {
+            console.log(err.errors)
+            throw err
+        })
         const currentId = await this.getCurrentProjectId(userId)
         console.log(JSON.stringify(data, undefined, 2))
         return data.viewer.projectsNext.nodes.map(project => ({

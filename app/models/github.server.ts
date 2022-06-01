@@ -33,6 +33,9 @@ export class GithubService {
 
     async getGraphql(userId: User["id"]) {
         const token = await this.getGithubAccessToken(userId)
+        console.log('TOKEN', token)
+        const resp = await (await this.getOctokit(userId)).rest.repos.listForAuthenticatedUser()
+        console.log('HEADERS', resp.headers)
         return graphql.defaults({
             headers: {
                 authorization: `token ${token}`,
@@ -49,13 +52,15 @@ export class GithubService {
         })
         const authorizeURL = `${githubAuthorizeURL}`
             + `?client_id=${GITHUB_CLIENT_ID}`
+            + `&scope=repo`
             + `&redirect_uri=${encodeURIComponent(GITHUB_OAUTH_CALLBACK_URL)}`
             + `&state=${stateCode}`
         return authorizeURL
     }
 
     async getGithubAccessToken(userId: User["id"]) {
-        const githubAccess = await prisma.githubAccess.findFirst({ where: { userId } })
+        const count = await prisma.githubAccess.count({ where: { userId } })
+        const githubAccess = await prisma.githubAccess.findUnique({ where: { userId } })
         if (!githubAccess) { throw new Error(`User ${userId} does not have github access configured`) }
         if (Date.now() > githubAccess.accessTokenExpiresAt.getTime()) {
             const refreshedResp = await this.refreshGithubAccessToken(userId, {})
@@ -71,7 +76,7 @@ export class GithubService {
     }
 
     async isUserAuthenticated(userId: User["id"]): Promise<boolean> {
-        const githubAccess = await prisma.githubAccess.findFirst({ where: { userId } })
+        const githubAccess = await prisma.githubAccess.findUnique({ where: { userId } })
         return githubAccess !== null
     }
 
@@ -94,6 +99,7 @@ export class GithubService {
         }
 
         const responseBody = await resp.json()
+        console.log('TOKEN RESPONSE', responseBody)
         if (responseBody.error) {
             throw new Error(`Received error from github oauth access token endpoint: ${responseBody.error}: ${responseBody.error_description}`)
         }

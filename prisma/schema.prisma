@@ -20,6 +20,7 @@ model User {
   githubOAuthState  GithubOAuthState[]
   UserConfig        UserConfig?
   GithubBoardConfig GithubBoardConfig?
+  GoalState         GoalState[]
 }
 
 model UserConfig {
@@ -65,4 +66,11 @@ model GithubBoardConfig {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String @unique
   projectId String
+}
+
+model GoalState {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+  nodeID String @unique
 }

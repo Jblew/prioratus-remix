@@ -3,6 +3,8 @@ import { json } from "@remix-run/node"
 import { Link, useLoaderData } from "@remix-run/react"
 import invariant from "tiny-invariant"
 import { ButtonLink } from "~/components"
+import container from "~/container.server"
+import { UserGoal, UserGoals } from "~/domain"
 import { requireUserId } from "~/session.server"
 interface Task {
     name: string
@@ -11,45 +13,39 @@ interface Task {
 }
 
 type LoaderData = {
-    tasks: Task[]
+    goals: UserGoal[]
 }
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-    const userId = await requireUserId(request)
+    const userID = await requireUserId(request)
     invariant(params.dateIso, "dateIso not found")
+    const goals = await container.get(UserGoals).getGoals(userID)
 
-    const tasks = [
-        { name: "Nauka języka", count: 1, maxCount: 1 },
-        { name: "Rozmowa z Joanną", count: 0, maxCount: 1 },
-        { name: "Zadania data science", count: 1, maxCount: 2 },
-        { name: "Treningi", count: 1, maxCount: 2 }
-    ]
-
-    return json<LoaderData>({ tasks })
+    return json<LoaderData>({ goals })
 }
 
 export default function GoalsDay() {
-    const { tasks } = useLoaderData() as LoaderData
+    const { goals } = useLoaderData() as LoaderData
 
     return <>
         <ul className="container mx-auto p-8 space-y-8">
-            {tasks.map((task, i) => (
-                <TaskSelectorLi key={i} task={task} />
+            {goals.map((goal, i) => (
+                <GoalSelectorLi key={i} goal={goal} />
             ))}
         </ul>
     </>
 }
 
-function TaskSelectorLi({ task }: { task: Task }) {
+function GoalSelectorLi({ goal }: { goal: UserGoal }) {
     return (
         <li className="rounded bg-slate-700 px-2 flex justify-start divide-x divide-gray-400">
-            <p className="p-2 pr-4 font-bold tracking-wide">{task.name}</p>
+            <p className="p-2 pr-4 font-bold tracking-wide">{goal.title}</p>
             <button className="py-2 px-3 bg-slate-500 hover:bg-slate-400">Not done</button>
-            {task.maxCount === 1 && <>
+            {goal.maxCount === 1 && <>
                 <button className="py-2 px-3 hover:bg-slate-400">Done</button>
             </>}
-            {task.maxCount > 1 && <>
-                {[...Array(task.maxCount)].map((_, i) => (
+            {goal.maxCount > 1 && <>
+                {[...Array(goal.maxCount)].map((_, i) => (
                     <button key={i} className="py-2 px-5 hover:bg-slate-400">{i + 1}</button>
                 ))}
             </>}
